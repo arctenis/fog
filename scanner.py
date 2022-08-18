@@ -1,16 +1,35 @@
 from token_type import T
 from token import Token
-from fog import Fog
-from fog import Fog
 
 
 class Scanner:
-    def __init__(self, source):
+    def __init__(self, source, fog):
         self.source = source
         self.tokens = []
         self.start = 0
         self.current = 0
         self.line = 1
+        self.fog = fog
+        self.keywords = {
+                "and": T.AND,
+                "class": T.CLASS,
+                "else": T.ELSE,
+                "false": T.FALSE,
+                "for": T.FOR,
+                "fun": T.FUN,
+                "if": T.IF,
+                "nil": T.NIL,
+                "or": T.OR,
+                "print": T.PRINT,
+                "or": T.OR,
+                "print": T.PRINT,
+                "return": T.RETURN,
+                "super": T.SUPER,
+                "this": T.THIS,
+                "true": T.TRUE,
+                "var": T.VAR,
+                "while": T.WHILE,
+                }
 
     def scan_tokens(self):
         while not self.at_end():
@@ -65,10 +84,10 @@ class Scanner:
             case _:
                 if c.isnumeric():
                     self.number()
-                elif is_alpha(c):
+                elif self.is_alpha(c):
                     self.identifier()
                 else:
-                    Fog.error(self.line, "Unexpected character.")
+                    self.fog.error(self.line, "Unexpected character.")
 
     def add_token(self, token_type, literal=None):
         text = self.source[self.start : self.current]
@@ -107,12 +126,12 @@ class Scanner:
         self.add_token(T.STRING, value)
 
     def number(self):
-        while self.peek().isdigit():
+        while self.is_digit(self.peek()):
             self.advance()
 
-        if self.peek() == "." and self.peek_next().isdigit():
+        if self.peek() == "." and self.is_digit(self.peek_next()):
             self.advance()
-            while self.peek().isdigit():
+            while self.is_digit(self.peek()):
                 self.advance()
         self.add_token(T.NUMBER, float(self.source[self.start : self.current]))
 
@@ -121,16 +140,26 @@ class Scanner:
             return "\0"
         return self.source[self.current + 1]
 
+    def identifier(self):
+        while self.is_alphanumeric(self.peek()):
+            self.advance()
+        text = self.source[self.start:self.current]
+        token_type = self.keywords[text]
+        if token_type == None:
+            token_type = T.IDENTIFIER
+        self.add_token(token_type)
+
+    def is_digit(self, c):
+        return (c >= "0" and c<= "9")
+
     def is_alpha(self, c):
         return (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") or c == "_"
 
-    def identifier(self):
-        while self.peek().isalnum():
-            self.advance()
-        self.add_token(T.IDENTIFIER)
+    def is_alphanumeric(self, c):
+        return self.is_digit(c) or self.is_alpha(c)
+
 
     """
     TODO
-    Remplacer isdigit() par une fonction maison is_digit()
-    Remplacer isalnum() par une fonction maison is_alphanumeric()
+    - Gérer EOF : https://github.com/RJ722/plox/blob/master/lox/scanner.py
     """

@@ -1,4 +1,5 @@
 import sys
+from scanner import Scanner
 
 
 class Fog:
@@ -25,19 +26,13 @@ class Fog:
             self.__run(line)
 
     def __run(self, line):
-        tokens = self.scan_tokens(line)
-        for token in tokens:
-            print(token)
-        if self.had_error:
-            sys.exit()
-        self.had_error = False
-
-    def scan_tokens(self, line):
-        return line.split(" ")
+        scanner = Scanner(line, self)
+        tokens = scanner.scan_tokens()
+        print(tokens)
 
     @classmethod
     def error(cls, line_nb, msg):
-        cls.__report(line_nb, "", msg="")
+        cls.__report(line_nb, "", msg=msg)
 
     def __report(self, line_nb, where, msg):
         raise Exception(f"Line {line_nb} Error {where}: {msg}")
