@@ -35,8 +35,9 @@ class Fog:
     def scan_tokens(self, line):
         return line.split(" ")
 
-    def error(self, line_nb, msg):
-        self.__report(line_nb, "", msg)
+    @classmethod
+    def error(cls, line_nb, msg):
+        cls.__report(line_nb, "", msg="")
 
     def __report(self, line_nb, where, msg):
         raise Exception(f"Line {line_nb} Error {where}: {msg}")
