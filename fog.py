@@ -1,5 +1,5 @@
 import sys
-from scanner import Scanner
+from modules.scanner import Scanner
 
 
 class Fog:
@@ -28,7 +28,8 @@ class Fog:
     def __run(self, line):
         scanner = Scanner(line, self)
         tokens = scanner.scan_tokens()
-        print(tokens)
+        for token in tokens:
+            print(token.to_string())
 
     @classmethod
     def error(cls, line_nb, msg):

@@ -1,6 +1,9 @@
-from token_type import T
-from token import Token
+from .token_type import T
+from .token import Token
 
+
+def debug(msg, data):
+    print(f"DEBUG {msg} : {data}")
 
 class Scanner:
     def __init__(self, source, fog):
@@ -21,8 +24,6 @@ class Scanner:
                 "nil": T.NIL,
                 "or": T.OR,
                 "print": T.PRINT,
-                "or": T.OR,
-                "print": T.PRINT,
                 "return": T.RETURN,
                 "super": T.SUPER,
                 "this": T.THIS,
@@ -33,10 +34,12 @@ class Scanner:
 
     def scan_tokens(self):
         while not self.at_end():
+            # breakpoint()
             self.start = self.current
             self.scan_token()
 
-        self.tokens.append(Token("EOF", "", None, self.line))
+        self.tokens.append(Token(T.EOF, "", None, self.line))
+        return self.tokens
 
     def scan_token(self):
         c = self.advance()
@@ -110,7 +113,8 @@ class Scanner:
         return self.current >= len(self.source)
 
     def advance(self):
-        return self.source[self.current + 1]
+        self.current += 1
+        return self.source[self.current-1]
 
     def string(self):
         while self.peek() != '"' and not self.at_end():
@@ -119,7 +123,7 @@ class Scanner:
             self.advance()
 
         if self.at_end():
-            Fog.error(self.line, "Unterminated string.")
+            self.fog.error(self.line, "Unterminated string.")
             return None
         self.advance()
         value = self.source[self.start + 1 : self.current - 1]
@@ -136,7 +140,7 @@ class Scanner:
         self.add_token(T.NUMBER, float(self.source[self.start : self.current]))
 
     def peek_next(self):
-        if self.current + 1 >= len(self.source):
+        if self.current + 1 > len(self.source):
             return "\0"
         return self.source[self.current + 1]
 
@@ -144,9 +148,7 @@ class Scanner:
         while self.is_alphanumeric(self.peek()):
             self.advance()
         text = self.source[self.start:self.current]
-        token_type = self.keywords[text]
-        if token_type == None:
-            token_type = T.IDENTIFIER
+        token_type = self.keywords.get(text, T.IDENTIFIER)
         self.add_token(token_type)
 
     def is_digit(self, c):
@@ -157,6 +159,7 @@ class Scanner:
 
     def is_alphanumeric(self, c):
         return self.is_digit(c) or self.is_alpha(c)
+
 
 
     """

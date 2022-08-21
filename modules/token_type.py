@@ -24,8 +24,8 @@ types = [
         "LESS_EQUAL" ,
 
         # Literals.
-        "IDENTIFIER"
-        "STRING" 
+        "IDENTIFIER",
+        "STRING",
         "NUMBER",
 
         # Keywords.
